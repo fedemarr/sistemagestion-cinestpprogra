@@ -9,10 +9,12 @@ funciones = []
 # =========================
 # PELICULAS
 # =========================
-
 def cargar_pelicula():
+    """
+    Permite ingresar los datos de una pelicula y 
+    guardarla en la lista peliculas
+    """
     print("\n--- CARGAR PELICULA ---")
-
     titulo = input("Titulo: ")
     genero = input("Genero: ")
     duracion = input("Duracion (min): ")
@@ -32,6 +34,9 @@ def cargar_pelicula():
     print("Pelicula cargada")
 
 def mostrar_peliculas():
+    """
+    Muestra todas las peliculas cargadas en la lista peliculas
+    """
     print("\n--- PELICULAS ---")
 
     i = 0
@@ -45,6 +50,9 @@ def mostrar_peliculas():
 # =========================
 
 def cargar_cliente():
+    """
+    Permite registrar un cliente en la lista clientes
+    """
     print("\n--- CARGAR CLIENTE ---")
 
     nombre = input("Nombre: ")
@@ -69,6 +77,9 @@ def cargar_cliente():
     print("Cliente cargado")
 
 def mostrar_clientes():
+    """
+    Muestra todos los clientes registrados
+    """
     print("\n--- CLIENTES ---")
 
     i = 0
@@ -82,6 +93,9 @@ def mostrar_clientes():
 # =========================
 
 def crear_sala(filas, columnas):
+    """
+    Crea una matriz que representa la sala del cine
+    """
     sala = []
 
     i = 0
@@ -99,6 +113,9 @@ def crear_sala(filas, columnas):
     return sala
 
 def mostrar_sala(sala):
+    """
+    Muestra la sala en forma de matriz
+    """
     print("\n--- SALA ---")
 
     i = 0
@@ -115,6 +132,9 @@ def mostrar_sala(sala):
     print("0 libre | 1 ocupada")
 
 def ocupar_butaca(sala, fila, columna):
+    """
+    Permite ocupar una butaca específica
+    """
 
     if fila < 0 or fila >= len(sala):
         print("Fila invalida")
@@ -136,6 +156,9 @@ def ocupar_butaca(sala, fila, columna):
 # =========================
 
 def cargar_funcion():
+    """
+    Permite crear una función (pelicula)
+    """
     print("\n--- CARGAR FUNCION ---")
 
     if len(peliculas) == 0:
@@ -183,6 +206,10 @@ def cargar_funcion():
 # =========================
 
 def menu():
+    """
+    Menú principal del sistema, 
+    Te deja elegir entre las distintas opciones
+    """
     opcion = ""
 
     while opcion != "0":
