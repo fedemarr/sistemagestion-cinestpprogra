@@ -1,4 +1,5 @@
 import re
+import json
 from functools import reduce
 
 # =========================
@@ -152,6 +153,99 @@ def mostrar_compras_mayores():
 
 
 # =========================
+# ARCHIVOS JSON
+# Funciones para guardar y cargar datos con persistencia en archivos .json
+# Se usa json.dump() para escribir y json.load() para leer
+# indent=4 para que el archivo sea legible
+# Si el archivo no existe, se captura FileNotFoundError y se devuelve lista vacía
+# =========================
+
+def guardar_clientes_json():
+    """Guarda la lista de clientes en un archivo JSON."""
+    # json.dump escribe la lista en el archivo con formato indentado
+    try:
+        with open("clientes.json", "w") as archivo:
+            json.dump(clientes, archivo, indent=4)
+    except Exception as e:
+        print("Error al guardar clientes:", e)
+
+
+def cargar_clientes_json():
+    """Carga los clientes desde el archivo JSON al iniciar el programa."""
+    global clientes, dnis_registrados
+    # Si el archivo no existe, FileNotFoundError es capturado y se devuelve lista vacía
+    try:
+        with open("clientes.json", "r") as archivo:
+            clientes = json.load(archivo)
+            # Reconstruir el conjunto de DNIs desde los datos cargados
+            for c in clientes:
+                dnis_registrados.add(c["dni"])
+    except FileNotFoundError:
+        clientes = []
+    except Exception as e:
+        print("Error al cargar clientes:", e)
+        clientes = []
+
+
+def guardar_peliculas_json():
+    """Guarda la lista de películas en un archivo JSON."""
+    try:
+        with open("peliculas.json", "w") as archivo:
+            json.dump(peliculas, archivo, indent=4)
+    except Exception as e:
+        print("Error al guardar peliculas:", e)
+
+
+def cargar_peliculas_json():
+    """Carga las películas desde el archivo JSON al iniciar el programa."""
+    global peliculas
+    try:
+        with open("peliculas.json", "r") as archivo:
+            peliculas = json.load(archivo)
+    except FileNotFoundError:
+        peliculas = []
+    except Exception as e:
+        print("Error al cargar peliculas:", e)
+        peliculas = []
+
+
+def guardar_compras_json():
+    """Guarda la lista de compras en un archivo JSON."""
+    try:
+        # Las tuplas se convierten a listas al serializar en JSON
+        compras_serializables = []
+        for c in compras:
+            compra_copia = c.copy()
+            # Convertir tupla butaca a lista para que JSON pueda guardarla
+            compra_copia["butaca"] = list(c["butaca"])
+            # Convertir tupla resumen a lista
+            compra_copia["resumen"] = list(c["resumen"])
+            compras_serializables.append(compra_copia)
+        with open("compras.json", "w") as archivo:
+            json.dump(compras_serializables, archivo, indent=4)
+    except Exception as e:
+        print("Error al guardar compras:", e)
+
+
+def cargar_compras_json():
+    """Carga las compras desde el archivo JSON al iniciar el programa."""
+    global compras
+    try:
+        with open("compras.json", "r") as archivo:
+            datos = json.load(archivo)
+            # Restaurar tuplas desde listas al cargar
+            for c in datos:
+                c["butaca"] = tuple(c["butaca"])
+                c["resumen"] = tuple(c["resumen"])
+            compras = datos
+    except FileNotFoundError:
+        compras = []
+    except Exception as e:
+        print("Error al cargar compras:", e)
+        compras = []
+
+
+# =========================
 # CLIENTES
 # =========================
 
@@ -187,6 +281,9 @@ def registrar_cliente():
 
     clientes.append(cliente)
     dnis_registrados.add(dni)
+
+    # Guardar automáticamente al registrar un cliente nuevo
+    guardar_clientes_json()
 
     print("Registro exitoso")
 
@@ -228,18 +325,25 @@ def cargar_pelicula():
         print("Titulo invalido")
         return
 
-    if not duracion.isdigit():
+    # Excepción: se captura ValueError si la duración no es un número entero válido
+    try:
+        duracion_int = int(duracion)
+    except ValueError:
         print("Duracion invalida")
         return
 
     pelicula = {
         "titulo": titulo,
         "genero": genero,
-        "duracion": int(duracion),
+        "duracion": duracion_int,
         "clasificacion": clasificacion
     }
 
     peliculas.append(pelicula)
+
+    # Guardar automáticamente al cargar una película nueva
+    guardar_peliculas_json()
+
     print("Pelicula cargada")
 
 
@@ -274,11 +378,12 @@ def cargar_funcion():
 
     opcion = input("Elegir pelicula: ")
 
-    if not opcion.isdigit():
+    # Excepción: captura ValueError si la opción no es un número
+    try:
+        indice = int(opcion) - 1
+    except ValueError:
         print("Opcion invalida")
         return
-
-    indice = int(opcion) - 1
 
     if indice < 0 or indice >= len(peliculas):
         print("Pelicula incorrecta")
@@ -288,19 +393,24 @@ def cargar_funcion():
     sala_num = input("Sala: ")
     precio = input("Precio base: ")
 
-    if not sala_num.isdigit():
+    # Excepción: captura ValueError en sala y precio
+    try:
+        sala_num_int = int(sala_num)
+    except ValueError:
         print("Sala invalida")
         return
 
-    if not precio.isdigit():
+    try:
+        precio_int = int(precio)
+    except ValueError:
         print("Precio invalido")
         return
 
     funcion = {
         "pelicula": peliculas[indice]["titulo"],
         "horario": horario,
-        "sala_num": int(sala_num),
-        "precio_base": int(precio),
+        "sala_num": sala_num_int,
+        "precio_base": precio_int,
         "sala": crear_sala(5, 5)
     }
 
@@ -340,11 +450,12 @@ def ver_sala_de_funcion():
 
     opcion = input("Elegir funcion: ")
 
-    if not opcion.isdigit():
+    # Excepción: captura ValueError si la opción no es un número
+    try:
+        indice = int(opcion) - 1
+    except ValueError:
         print("Opcion invalida")
         return
-
-    indice = int(opcion) - 1
 
     if indice < 0 or indice >= len(funciones):
         print("Funcion incorrecta")
@@ -401,11 +512,12 @@ def comprar_entrada_cliente(dni):
 
     opcion = input("Elegir funcion: ")
 
-    if not opcion.isdigit():
+    # Excepción: captura ValueError si la opción no es un número
+    try:
+        indice = int(opcion) - 1
+    except ValueError:
         print("Opcion invalida")
         return
-
-    indice = int(opcion) - 1
 
     if indice < 0 or indice >= len(funciones):
         print("Funcion incorrecta")
@@ -419,16 +531,18 @@ def comprar_entrada_cliente(dni):
     fila = input("Fila: ")
     columna = input("Columna: ")
 
-    if not fila.isdigit():
+    # Excepción: captura ValueError en fila y columna
+    try:
+        fila = int(fila)
+    except ValueError:
         print("Fila invalida")
         return
 
-    if not columna.isdigit():
+    try:
+        columna = int(columna)
+    except ValueError:
         print("Columna invalida")
         return
-
-    fila = int(fila)
-    columna = int(columna)
 
     if fila < 0 or fila >= len(sala):
         print("Fila fuera de rango")
@@ -469,6 +583,9 @@ def comprar_entrada_cliente(dni):
 
     compras.append(compra)
 
+    # Guardar automáticamente al realizar una compra nueva
+    guardar_compras_json()
+
     print("\nCompra realizada")
     print("Pelicula:", compra["pelicula"])
     print("Horario:", compra["horario"])
@@ -502,6 +619,92 @@ def ver_recaudacion_total():
     """Muestra recaudación total."""
     print("\n--- RECAUDACION TOTAL ---")
     print("Total recaudado:", obtener_recaudacion_total())
+
+
+# =========================
+# PRUEBAS UNITARIAS
+# Cada prueba llama a una función, guarda el resultado y lo compara con el esperado.
+# Si el resultado es correcto se imprime "Prueba correcta", si no "Error en la prueba".
+# Permite detectar errores en funciones clave antes de usar el sistema.
+# =========================
+
+def prueba_validar_dni_valido():
+    """Prueba: DNI de 8 dígitos debe ser válido."""
+    resultado = validar_dni("28806009")
+
+    if resultado:
+        print("Prueba correcta - DNI valido reconocido")
+    else:
+        print("Error en la prueba - DNI valido no reconocido")
+
+
+def prueba_validar_dni_invalido():
+    """Prueba: DNI de menos de 8 dígitos debe ser inválido."""
+    resultado = validar_dni("123")
+
+    if not resultado:
+        print("Prueba correcta - DNI invalido rechazado")
+    else:
+        print("Error en la prueba - DNI invalido aceptado incorrectamente")
+
+
+def prueba_validar_telefono_valido():
+    """Prueba: teléfono de 10 dígitos debe ser válido."""
+    resultado = validar_telefono("1122334455")
+
+    if resultado:
+        print("Prueba correcta - Telefono valido reconocido")
+    else:
+        print("Error en la prueba - Telefono valido no reconocido")
+
+
+def prueba_validar_telefono_invalido():
+    """Prueba: teléfono de menos de 10 dígitos debe ser inválido."""
+    resultado = validar_telefono("123456789")
+
+    if not resultado:
+        print("Prueba correcta - Telefono invalido rechazado")
+    else:
+        print("Error en la prueba - Telefono invalido aceptado incorrectamente")
+
+
+def prueba_calcular_precio_sin_descuento():
+    """Prueba: precio 1000 -> aumento 10% -> 1100, no supera 3000 -> sin descuento."""
+    resultado = calcular_precio_final(1000)
+
+    if resultado == 1100.0:
+        print("Prueba correcta - Precio sin descuento calculado bien")
+    else:
+        print("Error en la prueba - Precio sin descuento incorrecto:", resultado)
+
+
+def prueba_calcular_precio_con_descuento():
+    """Prueba: precio 3000 -> aumento 10% -> 3300, supera 3000 -> descuento 5% -> 3135."""
+    resultado = calcular_precio_final(3000)
+
+    if resultado == 3135.0:
+        print("Prueba correcta - Precio con descuento calculado bien")
+    else:
+        print("Error en la prueba - Precio con descuento incorrecto:", resultado)
+
+
+def ejecutar_pruebas():
+    """Ejecuta todas las pruebas unitarias."""
+    print("\n--- EJECUTANDO PRUEBAS UNITARIAS ---")
+
+    # Pruebas de validar_dni
+    prueba_validar_dni_valido()
+    prueba_validar_dni_invalido()
+
+    # Pruebas de validar_telefono
+    prueba_validar_telefono_valido()
+    prueba_validar_telefono_invalido()
+
+    # Pruebas de calcular_precio_final
+    prueba_calcular_precio_sin_descuento()
+    prueba_calcular_precio_con_descuento()
+
+    print("--- FIN DE PRUEBAS ---")
 
 
 # =========================
@@ -556,6 +759,8 @@ def menu_admin():
         print("9. Ver recaudacion")
         print("10. Ver compras mayores a $5000")
         print("11. Ver productos faltantes")
+        # Nueva opción: ejecutar pruebas unitarias
+        print("12. Ejecutar pruebas")
         print("0. Volver")
 
         op = input("Opcion: ")
@@ -582,6 +787,9 @@ def menu_admin():
             mostrar_compras_mayores()
         if op == "11":
             mostrar_productos_faltantes()
+        # Ejecutar pruebas unitarias desde el menú admin
+        if op == "12":
+            ejecutar_pruebas()
 
 
 def menu_cliente(dni):
@@ -631,9 +839,16 @@ def menu_principal():
 
 # =========================
 # MAIN
+# Los datos se cargan automáticamente al iniciar el programa desde los archivos JSON.
+# Si los archivos no existen, se usan listas vacías (manejado con FileNotFoundError).
 # =========================
 
 def main():
+    # Carga automática de datos persistidos al arrancar
+    cargar_clientes_json()
+    cargar_peliculas_json()
+    cargar_compras_json()
+
     menu_principal()
 
 
