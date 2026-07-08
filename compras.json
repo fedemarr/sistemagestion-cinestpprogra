@@ -1,0 +1,25 @@
+[
+    {
+        "dni": "46292384",
+        "pelicula": "toystory 5",
+        "horario": "20",
+        "butaca": [
+            1,
+            2
+        ],
+        "entrada": 2200.0,
+        "combo": "Combo chico",
+        "precio_combo": 2500,
+        "total": 4700.0,
+        "resumen": [
+            "46292384",
+            "toystory 5",
+            "20",
+            [
+                1,
+                2
+            ],
+            4700.0
+        ]
+    }
+]

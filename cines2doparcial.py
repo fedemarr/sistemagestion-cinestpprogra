@@ -708,6 +708,124 @@ def ejecutar_pruebas():
 
 
 # =========================
+# RECURSIVIDAD
+# Una función recursiva se llama a sí misma para resolver un problema.
+# Debe tener siempre un caso base que detenga las llamadas.
+# Cada llamada trabaja sobre una versión más pequeña del problema.
+# =========================
+
+def calcular_precio_acumulado(precio, cantidad):
+    """
+    Calcula el precio total de varias entradas con descuento acumulado.
+    Cada entrada adicional cuesta un 10% menos que la anterior.
+
+    Caso base: si cantidad es 0, no hay entradas, retorna 0.
+    Llamada recursiva: suma el precio actual mas el resultado de calcular
+    el resto de entradas con el precio reducido un 10%.
+
+    Ejemplo con precio=1000 y cantidad=3:
+    - Primera entrada:  $1000
+    - Segunda entrada:  $900  (10% menos que la primera)
+    - Tercera entrada:  $810  (10% menos que la segunda)
+    - Total:            $2710
+    """
+    # Caso base: no quedan entradas por calcular
+    if cantidad == 0:
+        return 0
+
+    # Llamada recursiva: precio de esta entrada + precio del resto con 10% de descuento
+    return precio + calcular_precio_acumulado(precio * 0.90, cantidad - 1)
+
+
+def buscar_cliente_recursivo(lista, dni, indice):
+    """
+    Busca un cliente por DNI de forma recursiva.
+    Analogia: como revisar cajas apiladas una por una.
+    Si la caja actual no es la buscada, se pasa a la siguiente.
+
+    Caso base 1: se llego al final de la lista sin encontrarlo -> retorna -1.
+    Caso base 2: se encontro el DNI -> retorna el indice.
+    Llamada recursiva: busca en el resto de la lista (indice + 1).
+    """
+    # Caso base: llegamos al final sin encontrar el DNI
+    if indice >= len(lista):
+        return -1
+
+    # Caso base: encontramos el cliente
+    if lista[indice]["dni"] == dni:
+        return indice
+
+    # Llamada recursiva: buscar en el resto de la lista
+    return buscar_cliente_recursivo(lista, dni, indice + 1)
+
+
+def calcular_precio_acumulado_menu():
+    """Calcula el precio total de varias entradas con descuento acumulado recursivo."""
+    print("\n--- PRECIO ACUMULADO CON DESCUENTO (RECURSIVIDAD) ---")
+
+    if len(funciones) == 0:
+        print("No hay funciones cargadas")
+        return
+
+    mostrar_funciones()
+
+    opcion = input("Elegir funcion: ")
+
+    # Excepcion: captura ValueError si no ingresa un numero
+    try:
+        indice = int(opcion) - 1
+    except ValueError:
+        print("Opcion invalida")
+        return
+
+    if indice < 0 or indice >= len(funciones):
+        print("Funcion incorrecta")
+        return
+
+    cantidad = input("Cantidad de entradas: ")
+
+    # Excepcion: captura ValueError si no ingresa un numero
+    try:
+        cantidad_int = int(cantidad)
+    except ValueError:
+        print("Cantidad invalida")
+        return
+
+    if cantidad_int <= 0:
+        print("La cantidad debe ser mayor a 0")
+        return
+
+    precio_base = calcular_precio_final(funciones[indice]["precio_base"])
+    total = calcular_precio_acumulado(precio_base, cantidad_int)
+
+    print("\nPrecio base de la entrada:", round(precio_base, 2))
+    print("Cantidad de entradas:", cantidad_int)
+    print("Cada entrada adicional tiene un 10% de descuento sobre la anterior")
+    print("Total acumulado (recursivo):", round(total, 2))
+
+
+def buscar_cliente_recursivo_menu():
+    """Busca un cliente por DNI usando la funcion recursiva."""
+    print("\n--- BUSCAR CLIENTE (RECURSIVO) ---")
+
+    if len(clientes) == 0:
+        print("No hay clientes registrados")
+        return
+
+    dni = input("DNI a buscar: ")
+
+    # Busqueda recursiva: comienza desde el indice 0
+    resultado = buscar_cliente_recursivo(clientes, dni, 0)
+
+    if resultado == -1:
+        print("Cliente no encontrado")
+    else:
+        c = clientes[resultado]
+        print("Cliente encontrado en posicion", resultado)
+        print("Nombre:", c["nombre"], "| DNI:", c["dni"], "| Tel:", c["telefono"])
+
+
+# =========================
 # LOGIN
 # =========================
 
@@ -761,6 +879,9 @@ def menu_admin():
         print("11. Ver productos faltantes")
         # Nueva opción: ejecutar pruebas unitarias
         print("12. Ejecutar pruebas")
+        # Opciones de recursividad
+        print("13. Precio acumulado con descuento (recursividad)")
+        print("14. Buscar cliente por DNI (recursividad)")
         print("0. Volver")
 
         op = input("Opcion: ")
@@ -790,6 +911,12 @@ def menu_admin():
         # Ejecutar pruebas unitarias desde el menú admin
         if op == "12":
             ejecutar_pruebas()
+        # Recursividad: calcular precio acumulado con descuento por cantidad
+        if op == "13":
+            calcular_precio_acumulado_menu()
+        # Recursividad: buscar cliente por DNI de forma recursiva
+        if op == "14":
+            buscar_cliente_recursivo_menu()
 
 
 def menu_cliente(dni):
